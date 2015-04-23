@@ -64,7 +64,7 @@ public class MobileLog extends LogInstance {
 
 			switch (paramMessage.what) {
 			case MSG_LOG_START:
-				mLogConnection.sendCmd("start");
+				mLogConnection.sendCmd("mobilelog", "start");
 				break;
 			default:
 				break;

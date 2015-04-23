@@ -8,6 +8,8 @@ import android.os.Message;
 import android.util.Log;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 public class LogConnection {
 	private static final String TAG = "JRDLogger/LogConnection";
@@ -20,6 +22,8 @@ public class LogConnection {
 	private InputStream mInputStream;
 	private OutputStream mOutputStream;
 	private Thread mListenThread = null;
+
+	private final Object mCmdLock = new Object();
 
 	public LogConnection(int paramInt, String paramString,
 			LocalSocketAddress.Namespace paramNamespace, Handler paramHandler) {
@@ -65,11 +69,84 @@ public class LogConnection {
 
 	}
 
-	public boolean sendCmd(String paramString) {
+	public boolean sendCmd(String cmd, Object... args) {
+		
+        final StringBuilder rawBuilder = new StringBuilder();
+        final StringBuilder logBuilder = new StringBuilder();
+
+        makeCommand(rawBuilder, logBuilder, cmd, args);
+        final String rawCmd = rawBuilder.toString();
+        final String logCmd = logBuilder.toString();
+
+        Log.d(TAG, "SND -> {" + logCmd + "}");
+
+        synchronized (mCmdLock) {
+            if (mOutputStream == null) {
+                throw new AssertionError("missing output stream");
+            } else {
+                try {
+                    mOutputStream.write(rawCmd.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    throw new RuntimeException("problem sending command", e);
+                }
+            }
+        }
 		return false;
 	}
-
+	
 	public void stop() {
 
 	}
+
+	private void makeCommand(StringBuilder rawBuilder, StringBuilder logBuilder, String cmd, Object... args) {
+        if (cmd.indexOf('\0') >= 0) {
+            throw new IllegalArgumentException("Unexpected command: " + cmd);
+        }
+        if (cmd.indexOf(' ') >= 0) {
+            throw new IllegalArgumentException("Arguments must be separate from command");
+        }
+        
+        rawBuilder.append(cmd);
+        logBuilder.append(cmd);
+        
+        for (Object arg : args) {
+            final String argString = String.valueOf(arg);
+            if (argString.indexOf('\0') >= 0) {
+                throw new IllegalArgumentException("Unexpected argument: " + arg);
+            }
+
+            rawBuilder.append(' ');
+            logBuilder.append(' ');
+
+            appendEscaped(rawBuilder, argString);
+            appendEscaped(logBuilder, argString);
+        }
+
+        rawBuilder.append('\0');
+	}
+
+    private void appendEscaped(StringBuilder builder, String arg) {
+        final boolean hasSpaces = arg.indexOf(' ') >= 0;
+        if (hasSpaces) {
+            builder.append('"');
+        }
+
+        final int length = arg.length();
+        for (int i = 0; i < length; i++) {
+            final char c = arg.charAt(i);
+
+            if (c == '"') {
+                builder.append("\\\"");
+            } else if (c == '\\') {
+                builder.append("\\\\");
+            } else {
+                builder.append(c);
+            }
+        }
+
+        if (hasSpaces) {
+            builder.append('"');
+        }
+    }
+
 }
