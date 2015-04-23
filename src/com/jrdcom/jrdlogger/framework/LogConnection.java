@@ -16,7 +16,7 @@ public class LogConnection {
 	private int mInstanceIndex = -1;
 
 	private Handler mHandler = null;
-	private LocalSocket socket;
+	private LocalSocket mSocket;
 	private LocalSocketAddress address;
 
 	private InputStream mInputStream;
@@ -34,20 +34,20 @@ public class LogConnection {
 	public LogConnection(String paramString,
 			LocalSocketAddress.Namespace paramNamespace, Handler paramHandler) {
 		this.mHandler = paramHandler;
-		this.socket = new LocalSocket();
+		this.mSocket = new LocalSocket();
 		this.address = new LocalSocketAddress(paramString, paramNamespace);
 	}
 
 	public LogConnection(String paramString, Handler paramHandler) {
-		this(paramString, LocalSocketAddress.Namespace.ABSTRACT, paramHandler);
+		this(paramString, LocalSocketAddress.Namespace.RESERVED, paramHandler);
 	}
 
 	public boolean connect() {
 		Log.d(TAG, "connect, socketname = " + address.getName());
 		try {
-			socket.connect(address, 5000);
-			mOutputStream = socket.getOutputStream();
-			mInputStream = socket.getInputStream();
+			mSocket.connect(address);
+			mOutputStream = mSocket.getOutputStream();
+			mInputStream = mSocket.getInputStream();
 			mListenThread = new Thread() {
 				public void run() {
 					listen();
@@ -62,7 +62,7 @@ public class LogConnection {
 	}
 
 	public boolean isConnected() {
-		return (this.socket != null) && (this.socket.isConnected());
+		return (this.mSocket != null) && (this.mSocket.isConnected());
 	}
 
 	public void listen() {
