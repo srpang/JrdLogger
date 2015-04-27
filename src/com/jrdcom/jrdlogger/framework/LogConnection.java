@@ -6,10 +6,12 @@ import android.net.LocalSocketAddress.Namespace;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogConnection {
 	private static final String TAG = "JRDLogger/LogConnection";
@@ -23,12 +25,14 @@ public class LogConnection {
 	private OutputStream mOutputStream;
 	private Thread mListenThread = null;
 
+	private AtomicInteger mSequenceNumber;
 	private final Object mCmdLock = new Object();
 
 	public LogConnection(int paramInt, String paramString,
 			LocalSocketAddress.Namespace paramNamespace, Handler paramHandler) {
 		this(paramString, paramNamespace, paramHandler);
 		this.mInstanceIndex = paramInt;
+		mSequenceNumber = new AtomicInteger(0);
 	}
 
 	public LogConnection(String paramString,
@@ -36,6 +40,7 @@ public class LogConnection {
 		this.mHandler = paramHandler;
 		this.mSocket = new LocalSocket();
 		this.address = new LocalSocketAddress(paramString, paramNamespace);
+		mSequenceNumber = new AtomicInteger(0);
 	}
 
 	public LogConnection(String paramString, Handler paramHandler) {
@@ -73,8 +78,9 @@ public class LogConnection {
 		
         final StringBuilder rawBuilder = new StringBuilder();
         final StringBuilder logBuilder = new StringBuilder();
-
-        makeCommand(rawBuilder, logBuilder, cmd, args);
+        
+        final int sequenceNumber = mSequenceNumber.incrementAndGet();
+        makeCommand(rawBuilder, logBuilder, sequenceNumber, cmd, args);
         final String rawCmd = rawBuilder.toString();
         final String logCmd = logBuilder.toString();
 
@@ -98,7 +104,8 @@ public class LogConnection {
 
 	}
 
-	private void makeCommand(StringBuilder rawBuilder, StringBuilder logBuilder, String cmd, Object... args) {
+	private void makeCommand(StringBuilder rawBuilder, StringBuilder logBuilder, int sequenceNumber, 
+														 String cmd, Object... args) {
         if (cmd.indexOf('\0') >= 0) {
             throw new IllegalArgumentException("Unexpected command: " + cmd);
         }
@@ -106,8 +113,8 @@ public class LogConnection {
             throw new IllegalArgumentException("Arguments must be separate from command");
         }
         
-        rawBuilder.append(cmd);
-        logBuilder.append(cmd);
+        rawBuilder.append(sequenceNumber).append(' ').append(cmd);
+        logBuilder.append(sequenceNumber).append(' ').append(cmd);
         
         for (Object arg : args) {
             final String argString = String.valueOf(arg);
