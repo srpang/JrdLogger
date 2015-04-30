@@ -45,6 +45,20 @@ public class MobileLog extends LogInstance {
 			super(paramString, localHandler);
 		}
 
+		@Override
+		public void dealWithResponse(byte[] rspbuff, Handler rspHandler) {
+			super.dealWithResponse(rspbuff, rspHandler);
+			String str = new String(rspbuff);
+			Log.d(TAG, "-->dealWithResponse(), rsp=" + str);
+			if ((rspbuff == null) || (rspbuff.length == 0)) {
+				 Log.d(TAG, "Get an empty response from native, ignore it.");
+				 return;
+			}
+			
+			
+			
+		}
+
 	}
 
 	class MobileLogHandler extends LogInstance.LogHandler {
@@ -64,7 +78,7 @@ public class MobileLog extends LogInstance {
 
 			switch (paramMessage.what) {
 			case MSG_LOG_START:
-				mLogConnection.sendCmd("mobilelog", "start");
+				mLogConnection.sendCmd("mobilelog", "startd");
 				break;
 			default:
 				break;

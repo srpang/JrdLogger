@@ -66,12 +66,40 @@ public class LogConnection {
 		return false;
 	}
 
+	public void dealWithResponse(byte[] paramArrayOfByte, Handler paramHandler) {
+		
+	}
+
 	public boolean isConnected() {
 		return (this.mSocket != null) && (this.mSocket.isConnected());
 	}
 
 	public void listen() {
+		byte[] responseBuf1 = new byte[100];
+		Log.d(TAG, "Monitor thread running");
+		while (true)
+		{
+            try
+		    {
+		        int i = this.mInputStream.read(responseBuf1, 0, 100);
+		        if (i < 0)
+		        {
+		        	Log.e(TAG, "Get a empty response from native layer, stop listen.");
+	                return;
+	            }
 
+		        Log.v(TAG, "Response from native byte size=" + i);
+		        byte[] responseBuf2 = new byte[i];
+		        System.arraycopy(responseBuf1, 0, responseBuf2, 0, i);
+
+		        dealWithResponse(responseBuf2, this.mHandler);
+		    }
+	        catch (IOException localIOException)
+	        {
+	        	Log.e(TAG, "read failed", localIOException);
+		        break;
+	        }
+	    }
 	}
 
 	public boolean sendCmd(String cmd, Object... args) {
