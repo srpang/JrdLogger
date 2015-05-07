@@ -95,11 +95,20 @@ public class JRDLoggerService extends Service {
 	}
 
 	public boolean startRecording(int paramInt, String paramString) {
-		LogInstance localLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
-		LogInstance.LogHandler localLogHandler = localLogInstance.mLogInstanceHandler;
-		localLogHandler.sendMessageDelayed(localLogHandler.obtainMessage(
+		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
+		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
+		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 
+		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
+		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
+		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
+				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
+		
+		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
+		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
+		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
+				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 		return true;
 	}
 

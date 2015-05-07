@@ -25,14 +25,13 @@ public class LogConnection {
 	private OutputStream mOutputStream;
 	private Thread mListenThread = null;
 
-	private AtomicInteger mSequenceNumber;
+	static private AtomicInteger mSequenceNumber = new AtomicInteger(0);;
 	private final Object mCmdLock = new Object();
 
 	public LogConnection(int paramInt, String paramString,
 			LocalSocketAddress.Namespace paramNamespace, Handler paramHandler) {
 		this(paramString, paramNamespace, paramHandler);
 		this.mInstanceIndex = paramInt;
-		mSequenceNumber = new AtomicInteger(0);
 	}
 
 	public LogConnection(String paramString,
@@ -40,7 +39,6 @@ public class LogConnection {
 		this.mHandler = paramHandler;
 		this.mSocket = new LocalSocket();
 		this.address = new LocalSocketAddress(paramString, paramNamespace);
-		mSequenceNumber = new AtomicInteger(0);
 	}
 
 	public LogConnection(String paramString, Handler paramHandler) {

@@ -26,6 +26,10 @@ public class LogInstance {
 		switch (paramInt) {
 		case MOBILE_LOG_INSTANCE:
 			return new MobileLog(paramContext, paramHandler);
+		case MODEM_LOG_INSTANCE:
+			return new ModemLog(paramContext, paramHandler);
+		case NETWORK_LOG_INSTANCE:
+			return new NetLog(paramContext, paramHandler);
 		default:
 			Log.e(TAG, "Unsported tag instance type[" + paramInt
 					+ "] till now.");
