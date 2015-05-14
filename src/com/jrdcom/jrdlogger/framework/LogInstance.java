@@ -49,8 +49,8 @@ public class LogInstance {
 		return 0;
 	}
 
-	public int getLogRunningStatus() {
-		return -1;
+	public boolean getLogRunningStatus() {
+		return false;
 	}
 
 	public boolean initLogConnection() {
@@ -93,4 +93,35 @@ public class LogInstance {
 		LogHandler() {
 		}
 	}
+	
+    class JRDLogdResponseCode {
+        // 100 series - Requestion action was initiated; expect another reply
+        // before proceeding with a new command.
+        public static final int ActionInitiated           = 100;
+        
+        // 200 series - Requested action has been successfully completed
+        public static final int CommandOkay               = 200;
+        public static final int StartOkay                 = 201;
+        public static final int StopOkay                  = 202;
+
+        // 400 series - The command was accepted but the requested action
+        // did not take place.
+        public static final int OperationFailed           = 400;
+        public static final int StartFailed               = 401;
+        public static final int StopFailed                = 402;
+
+        // 500 series - The command was not accepted and the requested
+        // action did not take place.
+        public static final int CommandSyntaxError        = 500;
+        public static final int CommandParameterError     = 501;
+        
+        // 600 series - self defined errors
+        public static final int FileAccessFailed          = 600;
+        public static final int FileOpenFailed            = 601;
+        public static final int ThreadStartFailed         = 602;
+        public static final int ThreadStopFailed          = 602;
+        public static final int LogAlreadyStartFailed     = 603;
+
+        public static final int ImpossibleFailed          = 700;
+    }
 }

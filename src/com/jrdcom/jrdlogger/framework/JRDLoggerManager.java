@@ -52,7 +52,30 @@ public class JRDLoggerManager {
 	}
 
 	public int getCurrentRunningStage() {
+		if (this.mService == null) {
+			Log.e(TAG, "Service has not been bind to yet.");
+			return 0;
+		}
+		try {
+			int result = this.mService.getCurrentRunningStage();
+			return result;
+		} catch (RemoteException localRemoteException) {
+			Log.e(TAG, "Fail to call service API.", localRemoteException);
+		}
+		return 0;
+	}
 
+	public int shouldBeRunningStage() {
+		if (this.mService == null) {
+			Log.e(TAG, "Service has not been bind to yet.");
+			return 0;
+		}
+		try {
+			int result = this.mService.shouldBeRunningStage();
+			return result;
+		} catch (RemoteException localRemoteException) {
+			Log.e(TAG, "Fail to call service API.", localRemoteException);
+		}
 		return 0;
 	}
 

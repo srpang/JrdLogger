@@ -1,11 +1,15 @@
 package com.jrdcom.jrdlogger;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ToggleButton;
+import java.util.Timer;
 import com.jrdcom.jrdlogger.framework.JRDLoggerManager;
 import com.jrdcom.jrdlogger.R;
 
@@ -14,14 +18,57 @@ public class MainActivity extends Activity {
 	private static final String TAG = "JrdLogger";
 	private ToggleButton mStartStopToggleButton;
 	private JRDLoggerManager mManager = null;
+	private ProgressDialog mWaitingDialog = null;
+	
+	private static final int MSG_WAITING_LOGGING_FINISHED = 1;
 
-	@Override
+	private Handler mMessageHandler = new Handler() {
+		public void handleMessage(Message paramMessage) {
+			switch (paramMessage.what) {
+			case MSG_WAITING_LOGGING_FINISHED:
+				if (mManager.getCurrentRunningStage() != mManager.shouldBeRunningStage()) {
+					mMessageHandler.sendMessageDelayed(mMessageHandler.obtainMessage(MSG_WAITING_LOGGING_FINISHED), 1000);
+				} else {
+					if (mWaitingDialog != null) {
+						mWaitingDialog.dismiss();
+						mWaitingDialog = null;
+					}
+				}
+				break;
+			}
+		}
+	};
+
+	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		findViews();
 		initViews();
 		setListeners();
+	}
+
+	@Override
+	protected void onResume()
+	{
+		Log.d("JRDLogger/MainActivity", "-->onResume");
+
+		
+		if (mManager.getCurrentRunningStage() != mManager.shouldBeRunningStage()) {
+			if (mManager.shouldBeRunningStage() == 0) {
+				mStartStopToggleButton.setChecked(true);
+			} else {
+				mStartStopToggleButton.setChecked(false);
+			}
+		} else {
+			if (mManager.shouldBeRunningStage() == 0) {
+				mStartStopToggleButton.setChecked(false);
+			} else {
+				mStartStopToggleButton.setChecked(true);
+			}
+		}
+		
+		super.onResume();
 	}
 
 	@Override
@@ -50,15 +97,25 @@ public class MainActivity extends Activity {
 							bool1 = localToggleButton.isChecked();
 						}
 						if (bool1) {
-							Log.e(TAG, "start");
+							Log.d(TAG, "start");
 							mManager.startLog(1, "from_ui");
+							showWaitingDialog("Starting", "Please wait a moment");
 						} else {
-							Log.e(TAG, "stop");
-
+							Log.d(TAG, "stop");
+							mManager.stopLog(1, "from_ui");
+							showWaitingDialog("Stopping", "Please wait a moment");
 						}
 
 					}
 				});
 
+	}
+	
+	private void showWaitingDialog(String title, String msg) {
+		Log.d(TAG, "-->showWaitingDialog()");
+		if (mWaitingDialog == null) {
+			mWaitingDialog = ProgressDialog.show(this, title, msg, true, false);
+		}
+		mMessageHandler.sendMessageDelayed(mMessageHandler.obtainMessage(MSG_WAITING_LOGGING_FINISHED), 1000);
 	}
 }

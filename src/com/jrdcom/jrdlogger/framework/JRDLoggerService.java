@@ -13,12 +13,16 @@ import com.jrdcom.jrdlogger.framework.IJRDLoggerManager;
 
 public class JRDLoggerService extends Service {
 	private static final String TAG = "JRDLogger/JRDLoggerManager";
-
+	private int mShouldBeStage = 0;
 	public IJRDLoggerManager.Stub mBind = new IJRDLoggerManager.Stub() {
 		public boolean clearLog() {
 			Log.d(TAG, "MTKLogger/MTKLoggerService -->clearLog()");
 			return true;
 		}
+
+	    public int shouldBeRunningStage() {
+	    	return JRDLoggerService.this.getGlobalShouldBeStage();
+	    }
 
 		public int getCurrentRunningStage() {
 			return JRDLoggerService.this.getGlobalRunningStage();
@@ -75,7 +79,27 @@ public class JRDLoggerService extends Service {
 	}
 
 	private int getGlobalRunningStage() {
-		return 1;
+		int result = 0;
+		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
+		if (mobileLogInstance.getLogRunningStatus()) {
+			result = 1 | result;
+		}
+
+		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
+		if (modemLogInstance.getLogRunningStatus()) {
+			result = 1<<2 | result;
+		}
+
+		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
+		if (netLogInstance.getLogRunningStatus()) {
+			result = 1<<4 | result;
+		}
+
+		return result;
+	}
+	
+	private int getGlobalShouldBeStage() {
+		return mShouldBeStage;
 	}
 
 	public int getLogInstanceRunningStatus(int paramInt) {
@@ -95,25 +119,45 @@ public class JRDLoggerService extends Service {
 	}
 
 	public boolean startRecording(int paramInt, String paramString) {
+		mShouldBeStage = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
 		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
 		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 
+		mShouldBeStage = 1 | mShouldBeStage;
 		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
 		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
 		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 		
+		mShouldBeStage = 1<<2 | mShouldBeStage;
 		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
 		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
 		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
+		mShouldBeStage = 1<<4 | mShouldBeStage;
 		return true;
 	}
 
 	public boolean stopRecording(int paramInt, String paramString) {
-		return false;
+		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
+		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
+		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
+				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+
+		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
+		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
+		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
+				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+		
+		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
+		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
+		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
+				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+		
+		mShouldBeStage = 0;
+		return true;
 	}
 
 	public IBinder onBind(Intent paramIntent) {

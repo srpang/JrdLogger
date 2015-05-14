@@ -1,5 +1,7 @@
 package com.jrdcom.jrdlogger.framework;
 
+import com.jrdcom.jrdlogger.framework.LogInstance.JRDLogdResponseCode;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,6 +15,7 @@ public class ModemLog extends LogInstance {
 	private ModemLogThread mModemLogThread;
 	private final String mSocketName = "jrdlogd";
 	private boolean bConnected = false;
+	private boolean bModemLogRunning = false;
 
 	public ModemLog(Context paramContext, Handler paramHandler) {
 		super(paramContext);
@@ -40,6 +43,11 @@ public class ModemLog extends LogInstance {
 		}
 	}
 
+	@Override
+	public boolean getLogRunningStatus() {
+		return bModemLogRunning;
+	}
+
 	class ModemLogConnection extends LogConnection {
 		public ModemLogConnection(String paramString, Handler localHandler) {
 			super(paramString, localHandler);
@@ -55,7 +63,13 @@ public class ModemLog extends LogInstance {
 				 return;
 			}
 			
-			
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StartOkay))) {
+            	bModemLogRunning = true;
+            }
+
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StopOkay))) {
+            	bModemLogRunning = false;
+            }	
 			
 		}
 
@@ -79,6 +93,9 @@ public class ModemLog extends LogInstance {
 			switch (paramMessage.what) {
 			case MSG_LOG_START:
 				mLogConnection.sendCmd("modemlog", "start");
+				break;
+			case MSG_LOG_STOP:
+				mLogConnection.sendCmd("modemlog", "stop");
 				break;
 			default:
 				break;

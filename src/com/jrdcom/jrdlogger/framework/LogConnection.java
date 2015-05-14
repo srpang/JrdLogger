@@ -21,6 +21,7 @@ public class LogConnection {
 	private LocalSocket mSocket;
 	private LocalSocketAddress address;
 
+	private final int BUFFER_SIZE = 4096;
 	private InputStream mInputStream;
 	private OutputStream mOutputStream;
 	private Thread mListenThread = null;
@@ -73,13 +74,13 @@ public class LogConnection {
 	}
 
 	public void listen() {
-		byte[] responseBuf1 = new byte[100];
+		byte[] responseBuf1 = new byte[BUFFER_SIZE];
 		Log.d(TAG, "Monitor thread running");
 		while (true)
 		{
             try
 		    {
-		        int i = this.mInputStream.read(responseBuf1, 0, 100);
+		        int i = this.mInputStream.read(responseBuf1, 0, BUFFER_SIZE);
 		        if (i < 0)
 		        {
 		        	Log.e(TAG, "Get a empty response from native layer, stop listen.");
@@ -123,7 +124,7 @@ public class LogConnection {
                 }
             }
         }
-		return false;
+		return true;
 	}
 	
 	public void stop() {

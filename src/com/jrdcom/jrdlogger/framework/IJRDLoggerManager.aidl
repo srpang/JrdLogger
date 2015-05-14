@@ -2,6 +2,7 @@ package com.jrdcom.jrdlogger.framework;
 
 interface IJRDLoggerManager
 {
+	int shouldBeRunningStage();
 	int getCurrentRunningStage();
 	int getLogRunningStatus(int paramInt);
 	boolean runCommand(String paramString);

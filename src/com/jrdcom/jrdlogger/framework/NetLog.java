@@ -1,5 +1,7 @@
 package com.jrdcom.jrdlogger.framework;
 
+import com.jrdcom.jrdlogger.framework.LogInstance.JRDLogdResponseCode;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,7 +15,8 @@ public class NetLog extends LogInstance {
 	private NetLogThread mNetLogThread;
 	private final String mSocketName = "jrdlogd";
 	private boolean bConnected = false;
-
+	private boolean bNetLogRunning = false;
+	
 	public NetLog(Context paramContext, Handler paramHandler) {
 		super(paramContext);
 		mServicehandler = paramHandler;
@@ -40,6 +43,11 @@ public class NetLog extends LogInstance {
 		}
 	}
 
+	@Override
+	public boolean getLogRunningStatus() {
+		return bNetLogRunning;
+	}
+
 	class NetLogConnection extends LogConnection {
 		public NetLogConnection(String paramString, Handler localHandler) {
 			super(paramString, localHandler);
@@ -54,9 +62,14 @@ public class NetLog extends LogInstance {
 				 Log.d(TAG, "Get an empty response from native, ignore it.");
 				 return;
 			}
-			
-			
-			
+
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StartOkay))) {
+            	bNetLogRunning = true;
+            }
+
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StopOkay))) {
+            	bNetLogRunning = false;
+            }				
 		}
 
 	}
@@ -79,6 +92,9 @@ public class NetLog extends LogInstance {
 			switch (paramMessage.what) {
 			case MSG_LOG_START:
 				mLogConnection.sendCmd("netlog", "start");
+				break;
+			case MSG_LOG_STOP:
+				mLogConnection.sendCmd("netlog", "stop");
 				break;
 			default:
 				break;

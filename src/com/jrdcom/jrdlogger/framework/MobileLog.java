@@ -13,6 +13,7 @@ public class MobileLog extends LogInstance {
 	private MobileLogThread mMobileLogThread;
 	private final String mSocketName = "jrdlogd";
 	private boolean bConnected = false;
+	private boolean bMobleLogRunning = false;
 
 	public MobileLog(Context paramContext, Handler paramHandler) {
 		super(paramContext);
@@ -40,6 +41,11 @@ public class MobileLog extends LogInstance {
 		}
 	}
 
+	@Override
+	public boolean getLogRunningStatus() {
+		return bMobleLogRunning;
+	}
+	
 	class MobileLogConnection extends LogConnection {
 		public MobileLogConnection(String paramString, Handler localHandler) {
 			super(paramString, localHandler);
@@ -55,10 +61,14 @@ public class MobileLog extends LogInstance {
 				 return;
 			}
 			
-			
-			
-		}
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StartOkay))) {
+            	bMobleLogRunning = true;
+            }
 
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.StopOkay))) {
+            	bMobleLogRunning = false;
+            }
+		}
 	}
 
 	class MobileLogHandler extends LogInstance.LogHandler {
@@ -79,6 +89,9 @@ public class MobileLog extends LogInstance {
 			switch (paramMessage.what) {
 			case MSG_LOG_START:
 				mLogConnection.sendCmd("mobilelog", "start");
+				break;
+			case MSG_LOG_STOP:
+				mLogConnection.sendCmd("mobilelog", "stop");
 				break;
 			default:
 				break;
