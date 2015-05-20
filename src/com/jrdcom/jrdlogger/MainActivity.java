@@ -1,19 +1,18 @@
 package com.jrdcom.jrdlogger;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.app.Activity;
-import android.app.ProgressDialog;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ToggleButton;
-import java.util.Timer;
-import com.jrdcom.jrdlogger.framework.JRDLoggerManager;
-import com.jrdcom.jrdlogger.R;
 
-public class MainActivity extends Activity {
+import com.jrdcom.jrdlogger.framework.JRDLoggerManager;
+
+public class MainActivity extends ActionBarActivity {
 
 	private static final String TAG = "JrdLogger";
 	private ToggleButton mStartStopToggleButton;
@@ -42,7 +41,8 @@ public class MainActivity extends Activity {
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+//		setContentView(R.layout.main);
+		setContentView(R.layout.activity_main);
 		findViews();
 		initViews();
 		setListeners();
