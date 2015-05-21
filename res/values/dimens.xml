@@ -10,5 +10,8 @@
     <dimen name="category_card_heigt">24dp</dimen>
     <dimen name="category_phone_storage_text_size">12sp</dimen>
     <dimen name="category_phone_storage_memory_size">8sp</dimen>
+    <dimen name="fab_size">60dp</dimen>
+    <dimen name="fab_elevation">3dp</dimen>
+    <dimen name="fab_press_translation_z">9dp</dimen>
 
 </resources>

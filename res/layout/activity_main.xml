@@ -115,7 +115,7 @@
 
 
 
-            <ToggleButton
+            <!-- <ToggleButton
                 android:id="@+id/startStopToggleButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
@@ -125,7 +125,26 @@
                 android:background="@drawable/floating_action_button"
                 android:layout_marginBottom="20dp">
 
-            </ToggleButton>
+            </ToggleButton> -->
+            
+            <com.jrdcom.jrdlogger.ui.FloatingActionButton
+		            android:id="@+id/startStopToggleButton"
+		            android:layout_gravity="bottom|center_horizontal"
+		            android:layout_width="@dimen/fab_size"
+		            android:layout_height="@dimen/fab_size"
+		            android:elevation="@dimen/fab_elevation"
+		            android:stateListAnimator="@animator/fab_anim"
+		            android:background="@drawable/floating_action_button"
+		            android:layout_marginBottom="20dp">
+		
+		        <ImageView
+		                android:layout_width="wrap_content"
+		                android:layout_height="wrap_content"
+		                android:src="@drawable/bg_btn_selector"
+		                android:layout_gravity="center"
+		                android:duplicateParentState="true"/>
+		
+		    </com.jrdcom.jrdlogger.ui.FloatingActionButton>
         </FrameLayout>
 
         <!-- 侧滑菜单内容 -->
