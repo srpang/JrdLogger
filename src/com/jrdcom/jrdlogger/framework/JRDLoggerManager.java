@@ -34,6 +34,7 @@ public class JRDLoggerManager {
 		Log.e(TAG, "initService()");
 		Intent localIntent = new Intent(
 				"com.jrdcom.jrdlogger.JRDLoggerService");
+		localIntent.setPackage(mContext.getPackageName());
 		this.mContext.startService(localIntent);
 		if (this.mContext.bindService(localIntent, this.mServiceConnection, 1))
 			return;

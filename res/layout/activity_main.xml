@@ -50,6 +50,72 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dip" >
             </com.example.toolbar.widget.PagerSlidingTabStrip>-->
+            
+	        <LinearLayout
+                android:layout_height="80dp"
+                android:layout_width="200dp"
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/storage_size_padding"
+                android:layout_marginRight="@dimen/storage_size_padding"
+                android:orientation="vertical" >
+                <LinearLayout 
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:gravity="center_horizontal"
+                    >
+                    <TextView 
+                        android:layout_height="wrap_content"
+                    	android:layout_width="wrap_content" 
+                    	android:text="Mobile Log" />
+                    
+				    <Switch
+				        style="@android:style/Theme.Material"
+				        android:id="@+id/mobile_toggle"
+					    android:layout_width="60dp"
+				        android:layout_height="25dp"
+				        android:layout_marginEnd="13dp"
+				     />
+			    </LinearLayout>
+			    
+                <LinearLayout 
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:gravity="center_horizontal"
+                    >
+                    <TextView 
+                        android:layout_height="wrap_content"
+                    	android:layout_width="wrap_content" 
+                    	android:text="Net Log" />
+                    
+				    <Switch
+				        style="@android:style/Theme.Material"
+				        android:id="@+id/net_toggle"
+					    android:layout_width="60dp"
+				        android:layout_height="25dp"
+				        android:layout_marginEnd="13dp"
+				     />
+			    </LinearLayout>
+			    
+                <LinearLayout 
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:gravity="center_horizontal"
+                    >
+                    <TextView 
+                        android:layout_height="wrap_content"
+                    	android:layout_width="wrap_content" 
+                    	android:text="Radio Log" />
+                    
+				    <Switch
+				        style="@android:style/Theme.Material"
+				        android:id="@+id/radio_toggle"
+					    android:layout_width="60dp"
+				        android:layout_height="25dp"
+				        android:layout_marginEnd="13dp"
+				     />
+			    </LinearLayout>
+		    </LinearLayout>
+			    
 
             <LinearLayout
                 android:layout_height="80dp"

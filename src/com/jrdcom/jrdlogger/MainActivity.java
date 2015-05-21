@@ -13,6 +13,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.ToggleButton;
 
 import com.jrdcom.jrdlogger.framework.JRDLoggerManager;
@@ -27,6 +28,9 @@ public class MainActivity extends ActionBarActivity {
 	private ActionBarDrawerToggle mDrawerToggle;
 	private JRDLoggerManager mManager = null;
 	private ProgressDialog mWaitingDialog = null;
+	private Switch mMobileSwitch;
+	private Switch mNetSwitch;
+	private Switch mRadioSwitch;
 	
 	private static final int MSG_WAITING_LOGGING_FINISHED = 1;
 
@@ -89,6 +93,9 @@ public class MainActivity extends ActionBarActivity {
 
 	private void findViews() {
 		this.mStartStopToggleButton = ((FloatingActionButton) findViewById(R.id.startStopToggleButton));
+		mMobileSwitch = (Switch) findViewById(R.id.mobile_toggle);
+		mNetSwitch = (Switch) findViewById(R.id.net_toggle);
+		mRadioSwitch = (Switch) findViewById(R.id.radio_toggle);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitle("JrdLogger");//
         setSupportActionBar(mToolbar);
