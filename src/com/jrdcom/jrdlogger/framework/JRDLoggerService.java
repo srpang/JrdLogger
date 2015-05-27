@@ -1,7 +1,10 @@
 package com.jrdcom.jrdlogger.framework;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -13,7 +16,10 @@ import com.jrdcom.jrdlogger.framework.IJRDLoggerManager;
 
 public class JRDLoggerService extends Service {
 	private static final String TAG = "JRDLogger/JRDLoggerManager";
-	private int mShouldBeStage = 0;
+	private SharedPreferences mSharedPreferences;
+	private final String LOG_SETTING_STATE = "log_setting_state";
+	private final String LOG_RUNNING_STATE = "log_running_state";
+
 	public IJRDLoggerManager.Stub mBind = new IJRDLoggerManager.Stub() {
 		public boolean clearLog() {
 			Log.d(TAG, "MTKLogger/MTKLoggerService -->clearLog()");
@@ -99,7 +105,7 @@ public class JRDLoggerService extends Service {
 	}
 	
 	private int getGlobalShouldBeStage() {
-		return mShouldBeStage;
+		return mSharedPreferences.getInt(LOG_RUNNING_STATE, 0);
 	}
 
 	public int getLogInstanceRunningStatus(int paramInt) {
@@ -119,28 +125,31 @@ public class JRDLoggerService extends Service {
 	}
 
 	public boolean startRecording(int paramInt, String paramString) {
-		mShouldBeStage = 0;
+		int state = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
 		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
 		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 
-		mShouldBeStage = 1 | mShouldBeStage;
+		state = 1 | state;
 		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
 		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
 		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
 		
-		mShouldBeStage = 1<<2 | mShouldBeStage;
+		state = 1<<2 | state;
 		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
 		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
 		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
-		mShouldBeStage = 1<<4 | mShouldBeStage;
+		state = 1<<4 | state;
+		
+		mSharedPreferences.edit().putInt(LOG_RUNNING_STATE, state).commit();
 		return true;
 	}
 
 	public boolean stopRecording(int paramInt, String paramString) {
+		int state = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
 		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
 		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
@@ -156,7 +165,7 @@ public class JRDLoggerService extends Service {
 		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
 				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
 		
-		mShouldBeStage = 0;
+		mSharedPreferences.edit().putInt(LOG_RUNNING_STATE, state).commit();
 		return true;
 	}
 
@@ -167,12 +176,12 @@ public class JRDLoggerService extends Service {
 
 	@Override
 	public void onCreate() {
-
+		mSharedPreferences = getSharedPreferences(LOG_SETTING_STATE, Context.MODE_MULTI_PROCESS);
 	}
 
 	@Override
 	public void onDestroy() {
-
+		mSharedPreferences = null;
 	}
 
 	@Override

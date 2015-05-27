@@ -22,7 +22,7 @@ import com.jrdcom.jrdlogger.ui.FloatingActionButton;
 public class MainActivity extends ActionBarActivity {
 
 	private static final String TAG = "JrdLogger";
-	private FloatingActionButton mStartStopToggleButton;
+	private FloatingActionButton mStartStopToggleButton = null;
 	private Toolbar mToolbar;
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -32,7 +32,9 @@ public class MainActivity extends ActionBarActivity {
 	private Switch mNetSwitch;
 	private Switch mRadioSwitch;
 	
-	private static final int MSG_WAITING_LOGGING_FINISHED = 1;
+	public static final int MSG_WAITING_LOGGING_FINISHED = 1;
+	public static final int MSG_CREATE_SERVICE_FINISHED = 2;
+	public static final int MSG_DISCONNECT_SERVICE_FINISHED = 3;
 
 	private Handler mMessageHandler = new Handler() {
 		public void handleMessage(Message paramMessage) {
@@ -45,6 +47,17 @@ public class MainActivity extends ActionBarActivity {
 						mWaitingDialog.dismiss();
 						mWaitingDialog = null;
 					}
+				}
+				break;
+			case MSG_CREATE_SERVICE_FINISHED:
+				if (mStartStopToggleButton != null) {
+					mStartStopToggleButton.setEnabled(true);
+				}
+				updateUI();
+				break;
+			case MSG_DISCONNECT_SERVICE_FINISHED:
+				if (mStartStopToggleButton != null) {
+					mStartStopToggleButton.setEnabled(false);
 				}
 				break;
 			}
@@ -65,22 +78,8 @@ public class MainActivity extends ActionBarActivity {
 	protected void onResume()
 	{
 		Log.d("JRDLogger/MainActivity", "-->onResume");
+		updateUI();
 
-		
-		if (mManager.getCurrentRunningStage() != mManager.shouldBeRunningStage()) {
-			if (mManager.shouldBeRunningStage() == 0) {
-				mStartStopToggleButton.setChecked(true);
-			} else {
-				mStartStopToggleButton.setChecked(false);
-			}
-		} else {
-			if (mManager.shouldBeRunningStage() == 0) {
-				mStartStopToggleButton.setChecked(false);
-			} else {
-				mStartStopToggleButton.setChecked(true);
-			}
-		}
-		
 		super.onResume();
 	}
 
@@ -92,12 +91,12 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	private void findViews() {
-		this.mStartStopToggleButton = ((FloatingActionButton) findViewById(R.id.startStopToggleButton));
+		mStartStopToggleButton = ((FloatingActionButton) findViewById(R.id.startStopToggleButton));
 		mMobileSwitch = (Switch) findViewById(R.id.mobile_toggle);
 		mNetSwitch = (Switch) findViewById(R.id.net_toggle);
 		mRadioSwitch = (Switch) findViewById(R.id.radio_toggle);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitle("JrdLogger");//
+        mToolbar.setTitle("JrdLogger");
         setSupportActionBar(mToolbar);
 //        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 //            @Override
@@ -127,7 +126,26 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	private void initViews() {
-		mManager = new JRDLoggerManager(this);
+		mManager = new JRDLoggerManager(this, mMessageHandler);
+		if (mStartStopToggleButton != null) {
+			mStartStopToggleButton.setEnabled(false);
+		}
+	}
+
+	private void updateUI() {
+		if (mManager.getCurrentRunningStage() != mManager.shouldBeRunningStage()) {
+			if (mManager.shouldBeRunningStage() == 0) {
+				mStartStopToggleButton.setChecked(true);
+			} else {
+				mStartStopToggleButton.setChecked(false);
+			}
+		} else {
+			if (mManager.shouldBeRunningStage() == 0) {
+				mStartStopToggleButton.setChecked(false);
+			} else {
+				mStartStopToggleButton.setChecked(true);
+			}
+		}
 	}
 
 	private void setListeners() {
@@ -135,9 +153,9 @@ public class MainActivity extends ActionBarActivity {
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View paramView) {
 						boolean bool1 = false;
-						ToggleButton localToggleButton;
-						if (paramView instanceof ToggleButton) {
-							localToggleButton = (ToggleButton) paramView;
+						FloatingActionButton localToggleButton;
+						if (paramView instanceof FloatingActionButton) {
+							localToggleButton = (FloatingActionButton) paramView;
 							bool1 = localToggleButton.isChecked();
 						}
 						if (bool1) {

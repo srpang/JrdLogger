@@ -4,29 +4,36 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
 import com.jrdcom.jrdlogger.framework.IJRDLoggerManager;
+import com.jrdcom.jrdlogger.MainActivity;
 
 public class JRDLoggerManager {
 	private static final String TAG = "JRDLogger/JRDLoggerManager";
 	private Context mContext = null;
+	private Handler mMainActivityHandler = null;
 	private IJRDLoggerManager mService = null;
 	ServiceConnection mServiceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.e(TAG, "Bind to service successfully");
 			mService = IJRDLoggerManager.Stub.asInterface(service);
+			mMainActivityHandler.sendMessage(mMainActivityHandler.obtainMessage(MainActivity.MSG_CREATE_SERVICE_FINISHED));
 		}
 
 		public void onServiceDisconnected(ComponentName paramComponentName) {
 			Log.e(TAG, "onServiceDisconnected");
 			mService = null;
+			mMainActivityHandler.sendMessage(mMainActivityHandler.obtainMessage(MainActivity.MSG_DISCONNECT_SERVICE_FINISHED));
 		}
 	};
 
-	public JRDLoggerManager(Context paramContext) {
+	public JRDLoggerManager(Context paramContext, Handler handler) {
 		this.mContext = paramContext;
+		mMainActivityHandler = handler;
 		initService();
 	}
 
