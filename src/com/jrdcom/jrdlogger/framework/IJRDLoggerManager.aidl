@@ -9,8 +9,8 @@ interface IJRDLoggerManager
 	boolean setAutoStart(int paramInt, boolean paramBoolean);
 	boolean setLogSize(int paramInt1, int paramInt2);
 	boolean setTotalLogSize(int paramInt1, int paramInt2);
-	boolean startLog(int paramInt, String paramString);
+	void startLog(int paramInt, String paramString);
 	boolean stopCommand();
-	boolean stopLog(int paramInt, String paramString);  
+	void stopLog(int paramInt, String paramString);  
 	
 }

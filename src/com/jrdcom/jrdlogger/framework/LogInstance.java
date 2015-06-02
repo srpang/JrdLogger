@@ -12,7 +12,7 @@ public class LogInstance {
 	protected static Context mContext;
 	protected LogHandler mLogInstanceHandler;
 	protected LogConnection mLogConnection;
-
+	private final Object waitDoneLock = new Object();
 	public static final int MOBILE_LOG_INSTANCE = 1;
 	public static final int MODEM_LOG_INSTANCE = 2;
 	public static final int NETWORK_LOG_INSTANCE = 3;
@@ -57,13 +57,25 @@ public class LogInstance {
 		return initLogConnection(this.mLogConnection);
 	}
 
+	public void start(String param) {
+		mLogInstanceHandler.sendMessage(mLogInstanceHandler.obtainMessage(
+				LogHandler.MSG_LOG_START, param));
+		return;
+	}
+
+	public void stop(String param) {
+		mLogInstanceHandler.sendMessage(mLogInstanceHandler.obtainMessage(
+				LogHandler.MSG_LOG_STOP, param));
+		return;
+	}
+
 	public static boolean initLogConnection(LogConnection paramLogConnection) {
 		Log.d(TAG, "initLogConnection with parameter");
 		if (paramLogConnection == null) {
 			Log.e(TAG, "paramLogConnection is null");
 			return false;
 		}
-		int  i = 5;
+		int i = 5;
 		while (i != 0) {
 			try {
 				if (paramLogConnection.connect())
@@ -85,43 +97,61 @@ public class LogInstance {
 
 	}
 
+	public void waitfor() {
+		synchronized (waitDoneLock) {
+			try {
+				waitDoneLock.wait();
+			} catch (InterruptedException ex) {
+				Log.e(TAG, "waitDone interrupted");
+			}
+		}
+	}
+
+	public void notifyfor() {
+		synchronized (waitDoneLock) {
+			waitDoneLock.notifyAll();
+		}
+	}
+
 	class LogHandler extends Handler {
-		public static final int MSG_UNKNOWN   = -1;
+		public static final int MSG_UNKNOWN = -1;
 		public static final int MSG_LOG_START = 1;
-		public static final int MSG_LOG_STOP  = 2;
-		
+		public static final int MSG_LOG_STOP = 2;
+		public static final int MSG_LOG_GET_RUNNING_STATUS = 3;
+
 		LogHandler() {
 		}
 	}
-	
-    class JRDLogdResponseCode {
-        // 100 series - Requestion action was initiated; expect another reply
-        // before proceeding with a new command.
-        public static final int ActionInitiated           = 100;
-        
-        // 200 series - Requested action has been successfully completed
-        public static final int CommandOkay               = 200;
-        public static final int StartOkay                 = 201;
-        public static final int StopOkay                  = 202;
 
-        // 400 series - The command was accepted but the requested action
-        // did not take place.
-        public static final int OperationFailed           = 400;
-        public static final int StartFailed               = 401;
-        public static final int StopFailed                = 402;
+	class JRDLogdResponseCode {
+		// 100 series - Requestion action was initiated; expect another reply
+		// before proceeding with a new command.
+		public static final int ActionInitiated = 100;
 
-        // 500 series - The command was not accepted and the requested
-        // action did not take place.
-        public static final int CommandSyntaxError        = 500;
-        public static final int CommandParameterError     = 501;
-        
-        // 600 series - self defined errors
-        public static final int FileAccessFailed          = 600;
-        public static final int FileOpenFailed            = 601;
-        public static final int ThreadStartFailed         = 602;
-        public static final int ThreadStopFailed          = 602;
-        public static final int LogAlreadyStartFailed     = 603;
+		// 200 series - Requested action has been successfully completed
+		public static final int CommandOkay = 200;
+		public static final int StartOkay = 201;
+		public static final int StopOkay = 202;
+		public static final int GetRunningStatusRsp = 203;
 
-        public static final int ImpossibleFailed          = 700;
-    }
+		// 400 series - The command was accepted but the requested action
+		// did not take place.
+		public static final int CommandFailed = 400;
+		public static final int StartFailed = 401;
+		public static final int StopFailed = 402;
+
+		// 500 series - The command was not accepted and the requested
+		// action did not take place.
+		public static final int CommandSyntaxError = 500;
+		public static final int CommandParameterError = 501;
+
+		// 600 series - self defined errors
+		public static final int FileAccessFailed = 600;
+		public static final int FileOpenFailed = 601;
+		public static final int ThreadStartFailed = 602;
+		public static final int ThreadStopFailed = 602;
+		public static final int LogAlreadyStartFailed = 603;
+
+		public static final int ImpossibleFailed = 700;
+	}
 }

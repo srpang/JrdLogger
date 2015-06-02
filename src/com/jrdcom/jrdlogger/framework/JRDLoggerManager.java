@@ -107,45 +107,38 @@ public class JRDLoggerManager {
 		return false;
 	}
 
-	public boolean startLog(int paramInt) {
-		return startLog(paramInt, null);
+	public void startLog(int paramInt) {
+		startLog(paramInt, null);
+		return;
 	}
 
-	public boolean startLog(int paramInt, String paramString) {
+	public void startLog(int paramInt, String paramString) {
 		if (this.mService == null) {
 			Log.e(TAG, "Service has not been bind to yet.");
-			return false;
 		}
 		try {
-			boolean bool = this.mService.startLog(paramInt, paramString);
-			return bool;
+			this.mService.startLog(paramInt, paramString);
 		} catch (RemoteException localRemoteException) {
 			Log.e(TAG, "Fail to call service API.", localRemoteException);
 		}
-		return false;
+		return;
 	}
 
-	public boolean stopCommand(String paramString) {
-
-		return false;
+	public void stopLog(int paramInt) {
+		stopLog(paramInt, null);
+		return;
 	}
 
-	public boolean stopLog(int paramInt) {
-		return stopLog(paramInt, null);
-	}
-
-	public boolean stopLog(int paramInt, String paramString) {
+	public void stopLog(int paramInt, String paramString) {
 		if (this.mService == null) {
 			Log.e(TAG, "Service has not been bind to yet.");
-			return false;
 		}
 		try {
-			boolean bool = this.mService.stopLog(paramInt, paramString);
-			return bool;
+			this.mService.stopLog(paramInt, paramString);
 		} catch (RemoteException localRemoteException) {
 			Log.e(TAG, "Fail to call service API.", localRemoteException);
 		}
-		return false;
+		return;
 	}
 
 }

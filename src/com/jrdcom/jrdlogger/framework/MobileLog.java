@@ -1,5 +1,7 @@
 package com.jrdcom.jrdlogger.framework;
 
+import com.jrdcom.jrdlogger.framework.LogInstance.LogHandler;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,9 +45,11 @@ public class MobileLog extends LogInstance {
 
 	@Override
 	public boolean getLogRunningStatus() {
+		mLogInstanceHandler.sendMessage(mLogInstanceHandler.obtainMessage(LogHandler.MSG_LOG_GET_RUNNING_STATUS));
+		waitfor();
 		return bMobleLogRunning;
 	}
-	
+
 	class MobileLogConnection extends LogConnection {
 		public MobileLogConnection(String paramString, Handler localHandler) {
 			super(paramString, localHandler);
@@ -63,10 +67,19 @@ public class MobileLog extends LogInstance {
 			
             if (str.startsWith(String.valueOf(JRDLogdResponseCode.StartOkay))) {
             	bMobleLogRunning = true;
+            	return;
             }
 
             if (str.startsWith(String.valueOf(JRDLogdResponseCode.StopOkay))) {
             	bMobleLogRunning = false;
+            	return;
+            }
+            
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.GetRunningStatusRsp))) {
+            	final String[] parsed = str.split(" ");
+            	bMobleLogRunning = parsed[2].startsWith("true");
+            	notifyfor();
+            	return;
             }
 		}
 	}
@@ -92,6 +105,9 @@ public class MobileLog extends LogInstance {
 				break;
 			case MSG_LOG_STOP:
 				mLogConnection.sendCmd("mobilelog", "stop");
+				break;
+			case MSG_LOG_GET_RUNNING_STATUS:
+				mLogConnection.sendCmd("mobilelog", "getstatus");
 				break;
 			default:
 				break;

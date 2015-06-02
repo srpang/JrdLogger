@@ -1,6 +1,7 @@
 package com.jrdcom.jrdlogger.framework;
 
 import com.jrdcom.jrdlogger.framework.LogInstance.JRDLogdResponseCode;
+import com.jrdcom.jrdlogger.framework.LogInstance.LogHandler;
 
 import android.content.Context;
 import android.os.Handler;
@@ -45,6 +46,8 @@ public class NetLog extends LogInstance {
 
 	@Override
 	public boolean getLogRunningStatus() {
+		mLogInstanceHandler.sendMessage(mLogInstanceHandler.obtainMessage(LogHandler.MSG_LOG_GET_RUNNING_STATUS));
+		waitfor();
 		return bNetLogRunning;
 	}
 
@@ -65,11 +68,20 @@ public class NetLog extends LogInstance {
 
             if (str.startsWith(String.valueOf(JRDLogdResponseCode.StartOkay))) {
             	bNetLogRunning = true;
+            	return;
             }
 
             if (str.startsWith(String.valueOf(JRDLogdResponseCode.StopOkay))) {
             	bNetLogRunning = false;
-            }				
+            	return;
+            }
+
+            if (str.startsWith(String.valueOf(JRDLogdResponseCode.GetRunningStatusRsp))) {
+            	final String[] parsed = str.split(" ");
+            	bNetLogRunning = parsed[2].startsWith("true");
+            	notifyfor();
+            	return;
+            }           
 		}
 
 	}
@@ -96,6 +108,9 @@ public class NetLog extends LogInstance {
 			case MSG_LOG_STOP:
 				mLogConnection.sendCmd("netlog", "stop");
 				break;
+			case MSG_LOG_GET_RUNNING_STATUS:
+				mLogConnection.sendCmd("netlog", "getstatus");
+				break;		
 			default:
 				break;
 			}

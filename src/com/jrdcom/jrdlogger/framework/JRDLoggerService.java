@@ -57,16 +57,16 @@ public class JRDLoggerService extends Service {
 					paramInt2);
 		}
 
-		public boolean startLog(int paramInt, String paramString) {
-			return JRDLoggerService.this.startRecording(paramInt, paramString);
+		public void startLog(int paramInt, String paramString) {
+			startRecording(paramInt, paramString);
 		}
 
 		public boolean stopCommand() {
 			return false;
 		}
 
-		public boolean stopLog(int paramInt, String paramString) {
-			return JRDLoggerService.this.stopRecording(paramInt, paramString);
+		public void stopLog(int paramInt, String paramString) {
+			stopRecording(paramInt, paramString);
 		}
 
 	};
@@ -87,16 +87,19 @@ public class JRDLoggerService extends Service {
 	private int getGlobalRunningStage() {
 		int result = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
+		//fix me
 		if (mobileLogInstance.getLogRunningStatus()) {
 			result = 1 | result;
 		}
 
 		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
+		//fix me
 		if (modemLogInstance.getLogRunningStatus()) {
 			result = 1<<2 | result;
 		}
 
 		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
+		//fix me
 		if (netLogInstance.getLogRunningStatus()) {
 			result = 1<<4 | result;
 		}
@@ -124,49 +127,41 @@ public class JRDLoggerService extends Service {
 		return false;
 	}
 
-	public boolean startRecording(int paramInt, String paramString) {
+	public void startRecording(int paramInt, String paramString) {
 		int state = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
-		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
-		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
-
+		//fix me
+		mobileLogInstance.start(paramString);
 		state = 1 | state;
+
 		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
-		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
-		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
-		
+		//fix me
+		modemLogInstance.start(paramString);		
 		state = 1<<2 | state;
+
 		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
-		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
-		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_START, paramString), 300);
+		//fix me
+		netLogInstance.start(paramString);
 		state = 1<<4 | state;
 		
 		mSharedPreferences.edit().putInt(LOG_RUNNING_STATE, state).commit();
-		return true;
 	}
 
-	public boolean stopRecording(int paramInt, String paramString) {
+	public void stopRecording(int paramInt, String paramString) {
 		int state = 0;
 		LogInstance mobileLogInstance = getLogInstance(LogInstance.MOBILE_LOG_INSTANCE);
-		LogInstance.LogHandler mobileLogHandler = mobileLogInstance.mLogInstanceHandler;
-		mobileLogHandler.sendMessageDelayed(mobileLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+		//fix me
+		mobileLogInstance.stop(paramString);
 
 		LogInstance modemLogInstance = getLogInstance(LogInstance.MODEM_LOG_INSTANCE);
-		LogInstance.LogHandler modemLogHandler = modemLogInstance.mLogInstanceHandler;
-		modemLogHandler.sendMessageDelayed(modemLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+		//fix me
+		modemLogInstance.stop(paramString);
 		
 		LogInstance netLogInstance = getLogInstance(LogInstance.NETWORK_LOG_INSTANCE);
-		LogInstance.LogHandler netLogHandler = netLogInstance.mLogInstanceHandler;
-		netLogHandler.sendMessageDelayed(netLogHandler.obtainMessage(
-				LogInstance.LogHandler.MSG_LOG_STOP, paramString), 300);
+		//fix me
+		netLogInstance.stop(paramString);
 		
 		mSharedPreferences.edit().putInt(LOG_RUNNING_STATE, state).commit();
-		return true;
 	}
 
 	public IBinder onBind(Intent paramIntent) {
